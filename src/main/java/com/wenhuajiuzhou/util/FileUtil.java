@@ -22,16 +22,9 @@ public class FileUtil {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
+            IOUtils.closeQuietly(reader);
         }
-        String s = builder.toString();
-        return s.substring(0, s.length() - 4);
+        return builder.toString();
     }
 
     public void writeStr2File(String content, String path) {

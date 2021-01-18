@@ -2,6 +2,7 @@ package com.wenhuajiuzhou;
 
 import com.wenhuajiuzhou.util.FileUtil;
 import com.wenhuajiuzhou.util.PPTUtil;
+import com.wenhuajiuzhou.util.TextHandler;
 import org.apache.poi.util.IOUtils;
 
 import java.io.FileWriter;
@@ -12,31 +13,24 @@ import java.util.regex.Pattern;
 public class CreatePPT {
 
     public static void main(String[] args) {
-        handleText();
-    }
-
-    private static void handleText() {
-        String content = FileUtil.readFileContent("res/fbd/1.fbd");
-        while (content.contains("\r\n\r\n")) {
-            content = content.replace("\r\n\r\n", "\r\n");
-        }
-
-        String[] split = content.split("〖BT1〗");
-        System.out.println(split.length);
-
+        PPTUtil.add();
     }
 
     public static void regex() {
         String fbdPath = "res/fbd/1.fbd";
         String content = FileUtil.readFileContent(fbdPath);
 
-        Pattern p = Pattern.compile("〖[^〖〗]*〗");
-        Matcher m = p.matcher(content);
-        while (m.find()) {
-            System.out.println(m.group());
-            System.out.print("start:" + m.start());
-            System.out.println(" end:" + m.end());
-        }
+        String s = TextHandler.deleteUselessTags(content);
+        System.out.println(s);
+
+//        Pattern p = Pattern.compile("〖[^〖〗]*〗");
+//        Pattern p = Pattern.compile("〖JZ[^〖〗]*〗");
+//        Matcher m = p.matcher(content);
+//        while (m.find()) {
+//            System.out.println(m.group());
+//            System.out.print("start:" + m.start());
+//            System.out.println(" end:" + m.end());
+//        }
     }
 
 }
