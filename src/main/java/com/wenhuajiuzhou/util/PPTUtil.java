@@ -1,11 +1,15 @@
 package com.wenhuajiuzhou.util;
 
 import org.apache.poi.common.usermodel.fonts.FontGroup;
+import org.apache.poi.common.usermodel.fonts.FontInfo;
 import org.apache.poi.sl.usermodel.PictureData;
 import org.apache.poi.sl.usermodel.TableCell;
 import org.apache.poi.sl.usermodel.TextParagraph;
+import org.apache.poi.sl.usermodel.TextRun;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
+import org.apache.xmlbeans.XmlObject;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTTextParagraphProperties;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,55 +19,73 @@ import java.util.List;
 
 public class PPTUtil {
 
-    public static void add() {
+    private static PPTUtil instance;
+
+    private XMLSlideShow ppt = null;
+    private XSLFSlideLayout layout;
+
+    private PPTUtil() {
+    }
+    public static PPTUtil getInstance() {
+        if (instance == null) {
+            instance = new PPTUtil();
+        }
+        return instance;
+    }
+
+
+    public void generatePPT(int index, String pptStr) {
+        //获取文件名
+        int startIndex = pptStr.indexOf("〖BT1〗");
+        int endIndex = pptStr.indexOf("〖HT〗", startIndex);
+        String fileName = pptStr.substring(startIndex + 5, endIndex);
+        System.out.println(fileName);
+
         File fileTemp = new File("res/ppt/template.pptx");
-        File fileDest = new File("res/ppt/1.pptx");
-
-        XMLSlideShow ppt = null;
+        File fileDest = new File("res/ppt/" + index + "." + fileName + ".pptx");
+        FileInputStream fis = null;
         try {
-            // 通过输入流读取一个现有的PPT文件，生成PPT类
-            ppt = new XMLSlideShow(new FileInputStream(fileTemp));
-
-            Dimension size = ppt.getPageSize();
-            System.out.println("width : " + size.getWidth()+", height :" + size.getHeight());
-
-            //获取幻灯片主题列表：
-            List<XSLFSlideMaster> slideMasters = ppt.getSlideMasters();
-            //获取幻灯片的布局样式
-            XSLFSlideLayout layout = slideMasters.get(0).getLayout("content");
-            //通过布局样式创建幻灯片
-            XSLFSlide slide = ppt.createSlide(layout);
-
-            // 在幻灯片中插入一个文本框
-            XSLFTextShape ts = slide.createTextBox();
-            // 设置文本框的位置和文本框大小
-            ts.setAnchor(new Rectangle(10, 80, 940, 380));
-            // 设置文本框里面的文字
-            XSLFTextParagraph paragraph = ts.addNewTextParagraph();
-            XSLFTextRun bt1 = paragraph.addNewTextRun();
-            bt1.setText("第一部分积累与运用（共30分）");
-            bt1.setFontFamily("黑体");
-            bt1.setFontSize(32d);
-            paragraph.addLineBreak();
-
-            XSLFTextRun bt2 = paragraph.addNewTextRun();
-            bt2.setText("一、联系语境，在横线上规范地写出词语。（每空1分，共6分）");
-            bt2.setFontFamily("黑体");
-            bt2.setFontSize(32d);
-            paragraph.addLineBreak();
-
-            XSLFTextRun content = paragraph.addNewTextRun();
-            content.setText("除夕之夜，家家户户［dēng huǒ tōng xiāo］〖ZZ(Z〗 〖=C1〗灯火通宵〖=C1F〗〖HTK〗 〖ZZ)〗、喜气洋洋。我们一家人各自忙碌着：大门外，爸爸负责贴［duì lián］\uE008\uE009〖ZZ(Z〗\uE008 〖=C1〗对联〖=C1F〗〖HTK〗 \uE009〖ZZ)〗；厨房里，奶奶忙着包［jiǎo zi］〖ZZ(Z〗 〖=C1〗饺子〖=C1F〗〖HTK〗 〖ZZ)〗，妈妈忙着炒菜，汤在锅里［fèi ténɡ］〖ZZ(Z〗 〖=C1〗沸腾〖=C1F〗〖HTK〗 〖ZZ)〗着；我和爷爷在餐厅准备碗筷；9岁的弟弟在院子里［rán fàng］〖ZZ(Z〗 〖=C1〗燃放〖=C1F〗〖HTK〗 〖ZZ)〗鞭炮，听到不［jiàn duàn］\uE008〖ZZ(Z〗 〖=C1〗间断〖=C1F〗〖HTK〗 〖ZZ)〗\uE009的鞭炮声，他开心地欢呼起来……处处充满了幸福和快乐。〖HT〗\uE003");
-            content.setFontFamily("楷体");
-            content.setFontSize(32d);
+            fis = new FileInputStream(fileTemp);
+            ppt = new XMLSlideShow(fis);
+            //获取幻灯片模板
+            layout = ppt.getSlideMasters().get(0).getLayout("content");
+            //按每个PAGE拆分字符串
+            String[] pageStrArray = pptStr.split("〖PAGE〗");
+            for (String pageStr : pageStrArray) {
+                generatePage(pageStr);
+//                break;
+            }
 
             // 将修改后的PPT文件回写到硬盘
             ppt.write(new FileOutputStream(fileDest));
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
+            IOUtils.closeQuietly(fis);
             IOUtils.closeQuietly(ppt);
         }
+    }
+
+    private void generatePage(String pageStr) {
+        pageStr = pageStr.trim();
+        System.out.println(pageStr);
+        System.out.println("------------------------------------------------------------");
+
+        pageStr = pageStr.replaceAll("\r\n", "\n");
+
+        //创建一页PPT
+        XSLFSlide slide = ppt.createSlide(layout);
+        // 在幻灯片中插入一个文本框
+        XSLFTextShape ts = slide.createTextBox();
+        // 设置文本框的位置和文本框大小
+        ts.setAnchor(new Rectangle(10, 90, 940, 380));
+        // 设置文本框里面的文字
+        XSLFTextParagraph p1 = ts.addNewTextParagraph();
+        XSLFTextRun r1 = p1.addNewTextRun();
+        r1.setText(pageStr);
+        r1.setFontSize(20d);
+        r1.setFontFamily("楷体", FontGroup.EAST_ASIAN);
+
     }
 
 }

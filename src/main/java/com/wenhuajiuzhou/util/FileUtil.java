@@ -14,8 +14,10 @@ public class FileUtil {
             reader = new BufferedReader(new FileReader(file));
             String tempStr;
             while ((tempStr = reader.readLine()) != null) {
-                builder.append(tempStr);
-                builder.append("\r\n");
+                if (!tempStr.trim().equals("\r\n")) {
+                    builder.append(tempStr);
+                    builder.append("\r\n");
+                }
             }
             reader.close();
             return builder.toString();

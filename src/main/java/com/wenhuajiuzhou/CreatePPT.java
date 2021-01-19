@@ -3,25 +3,27 @@ package com.wenhuajiuzhou;
 import com.wenhuajiuzhou.util.FileUtil;
 import com.wenhuajiuzhou.util.PPTUtil;
 import com.wenhuajiuzhou.util.TextHandler;
-import org.apache.poi.util.IOUtils;
-
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CreatePPT {
 
     public static void main(String[] args) {
-        PPTUtil.add();
+        generatePPTs();
     }
 
-    public static void regex() {
+    public static void generatePPTs() {
         String fbdPath = "res/fbd/1.fbd";
         String content = FileUtil.readFileContent(fbdPath);
 
-        String s = TextHandler.deleteUselessTags(content);
-        System.out.println(s);
+        content = TextHandler.deleteUselessTags(content);
+//        System.out.println(content);
+
+        //按每个PPT拆分字符串
+        String[] pptStrArray = content.split("〖PPT〗");
+        for (int i = 0; i < pptStrArray.length; i++) {
+            String pptStr = pptStrArray[i];
+            PPTUtil.getInstance().generatePPT(i, pptStr);
+            break;
+        }
 
 //        Pattern p = Pattern.compile("〖[^〖〗]*〗");
 //        Pattern p = Pattern.compile("〖JZ[^〖〗]*〗");
