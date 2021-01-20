@@ -14,6 +14,7 @@ public class TextHandler {
 
         //删除换行
         content = content.replaceAll("\uE003", "");
+        content = content.replaceAll("\uE004", "");
 
         //删除无用tag
         for (String tag : USELESS_TAGS) {
