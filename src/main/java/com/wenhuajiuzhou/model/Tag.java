@@ -5,24 +5,49 @@ import lombok.Data;
 @Data
 public class Tag {
 
-    private String whole;
-    private String tag;
+    //完整字符串，包括〖〗
+    private String tagStr;
+    //标签，如BT、JZ、BG
+    private String type;
+    //在line中的start
     private int start;
+    //在line中的end
     private int end;
+    //是否自定义标签
     private boolean isCustom;
+    //是否单标签
+    private boolean isSingle;
+    //是否双标签中的开始标签
+    private boolean isStartTag;
+    //参数
+    protected String param;
 
-    public void setWhole(String whole) {
-        this.whole = whole;
+    public void setTagStr(String tagStr) {
+        this.tagStr = tagStr;
+        init();
+    }
 
-        setCustom("=".equals(whole.substring(1, 2)));
+    protected void init() {
+        setCustom("=".equals(tagStr.substring(1, 2)));
 
-        String tag;
-        if (isCustom) {
-            tag = whole.substring(2, whole.length() - 1);
+        if (tagStr.contains("(") || tagStr.contains(")")
+                || tagStr.contains("（") || tagStr.contains("）")) {
+            setSingle(false);
+            setStartTag(tagStr.contains("(") || tagStr.contains("（") );
         } else {
-            tag = whole.substring(1, 3);
+            setSingle(true);
         }
-        setTag(tag);
+
+        if (isCustom) {
+            type = tagStr.substring(2, tagStr.length() - 1);
+        } else {
+            type = tagStr.substring(1, 3);
+            if (isSingle) {
+                param = tagStr.substring(3, tagStr.length() - 1);
+            } else {
+                param = tagStr.substring(4, tagStr.length() - 1);
+            }
+        }
     }
 
 }

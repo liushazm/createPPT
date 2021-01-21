@@ -37,7 +37,7 @@ public class Line {
         Matcher m = p.matcher(lineStr);
         tagList = null;
         hasTag = false;
-        System.out.println("length : " + lineStr.length());
+//        System.out.println("length : " + lineStr.length());
         while (m.find()) {
             if (tagList == null) {
                 tagList = new ArrayList<Tag>();
@@ -46,14 +46,13 @@ public class Line {
             String group = m.group();
             int start = m.start();
             int end = m.end();
-            System.out.println(group + " start : " + start + ", end : " + end);
+//            System.out.println(group + " start : " + start + ", end : " + end);
             Tag tag = new Tag();
-            tag.setWhole(group);
+            tag.setTagStr(group);
             tag.setStart(start);
             tag.setEnd(end);
             tagList.add(tag);
         }
-        System.out.println("-------------------");
         return tagList;
     }
 
@@ -74,7 +73,7 @@ public class Line {
             return;
         }
 
-        for (int i = 1; i < tagList.size() - 1; i++) {
+        for (int i = 1; i < tagList.size(); i++) {
             if (tagList.get(i).getStart() - tagList.get(i - 1).getEnd() > 1) {
                 hasContent = true;
                 return;
