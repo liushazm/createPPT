@@ -22,6 +22,7 @@ public class PPTUtil {
     private static final String FONT_HEI_TI = "黑体";
     private static final String FONT_KAI_TI = "楷体";
     private static final String FONT_FANG_SONG = "仿宋";
+    private static final String FONT_TIMES = "Times New Roman";
     private static final Color COLOR_BLACK = Color.BLACK;
     private static final Color COLOR_RED = Color.RED;
 
@@ -55,14 +56,7 @@ public class PPTUtil {
     //生成PPT文件
     public void generatePPT(int index, String pptStr) {
         //获取文件名
-        String fileName = "";
-        String pattern = "〖BT1〗.*?〖HT〗";
-        Pattern p = Pattern.compile(pattern);
-        Matcher m = p.matcher(pptStr);
-        if (m.matches()) {
-            String group = m.group();
-            fileName = group.substring(5, group.length() - 4);
-        }
+        String fileName = getFileName(pptStr);
 //        System.out.println(fileName);
 
         File fileTemp = new File("res/ppt/template.pptx");
@@ -91,8 +85,15 @@ public class PPTUtil {
         }
     }
 
+    private String getFileName(String pptStr) {
+        int start = pptStr.indexOf("〖BT1〗");
+        int end = pptStr.indexOf("〖HT〗", start);
+        return pptStr.substring(start + 5, end);
+    }
+
     //生成一页PPT
     private void generatePage(String pageStr) {
+//        System.out.println(pageStr);
         pageStr = pageStr.trim();
 
         //创建一页PPT
@@ -104,7 +105,7 @@ public class PPTUtil {
         // 设置文本框的位置和文本框大小
         mTs.setAnchor(new Rectangle(10, 90, 940, 380));
 
-        String[] lines = pageStr.split("\r\n");
+        String[] lines = pageStr.split("\n");
         for (String line : lines) {
             addLineText(line);
 //            System.out.println("---------------------------------");
@@ -182,6 +183,7 @@ public class PPTUtil {
                 break;
             case "C1F":
                 mColor = COLOR_BLACK;
+                mFont = FONT_SONG_TI;
                 addTextRun(mText);
                 break;
         }
@@ -234,10 +236,13 @@ public class PPTUtil {
                 addTextRun(mText);
                 break;
             case 3:
+            case 4:
+            case 5:
                 mFont = FONT_HEI_TI;
                 addTextRun(mText);
                 break;
         }
+        mFont = FONT_SONG_TI;
     }
 
 
@@ -257,6 +262,7 @@ public class PPTUtil {
         r.setText(text);
         r.setFontSize(28d);
         r.setFontFamily(mFont, FontGroup.EAST_ASIAN);
+        r.setFontFamily(FONT_TIMES, FontGroup.LATIN);
         r.setFontColor(mColor);
         r.setUnderlined(isUnderline);
     }
@@ -272,6 +278,10 @@ public class PPTUtil {
             isUnderline = false;
             addTextRun(text.substring(zzNumber));
         }
+    }
+
+    private void addLineBreak() {
+        mPrg.addLineBreak();
     }
 
 }

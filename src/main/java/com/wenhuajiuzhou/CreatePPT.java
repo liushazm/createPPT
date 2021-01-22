@@ -18,12 +18,12 @@ public class CreatePPT {
         System.out.println(content);
 
         //按每个PPT拆分字符串
-//        String[] pptStrArray = content.split("〖PPT〗");
-//        for (int i = 0; i < pptStrArray.length; i++) {
-//            String pptStr = pptStrArray[i];
-//            PPTUtil.getInstance().generatePPT(i, pptStr);
-//            break;
-//        }
+        String[] pptStrArray = content.split("〖LM〗");
+        for (int i = 0; i < pptStrArray.length; i++) {
+            String pptStr = pptStrArray[i];
+            PPTUtil.getInstance().generatePPT(i, pptStr);
+            break;
+        }
 
     }
 

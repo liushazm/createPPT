@@ -4,16 +4,11 @@ public class TextHandler {
 
     public static final String[] USELESS_TAGS = {
             "PJS", "YM", "XD", "BF", "KH",
-            "ZK", "HJ", "JZ", "KG", "WB", "DW",
+            "ZK", "HJ", "JZ", "KG", "WB",
             "ST", "JP", "WTXT", "WTBZ"
     };
 
     public static String deleteUselessTags(String content) {
-        //删除（临时）--start
-//        content = content.replaceAll("〖FK\\(.*〗[\\s\\S]*?〖FK\\)〗", "");
-//        content = content.replaceAll("^.*?时间\\：90分钟.*?$", "");
-        //删除（临时）--end
-
         //删除无用tag
         for (String tag : USELESS_TAGS) {
             String regex = "〖" + tag + ".*?〗";
@@ -31,6 +26,8 @@ public class TextHandler {
 
         //替换空格
         content = content.replaceAll("〓", " ");
+        //替换DW
+        content = content.replaceAll("〖DW.*?〗", "\t");
         //替换换行
         content = content.replaceAll("\uE003", "\n");
         content = content.replaceAll("\uE004", "\n");
