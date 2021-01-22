@@ -40,7 +40,7 @@ public class Line {
 //        System.out.println("length : " + lineStr.length());
         while (m.find()) {
             if (tagList == null) {
-                tagList = new ArrayList<Tag>();
+                tagList = new ArrayList<>();
                 hasTag = true;
             }
             String group = m.group();

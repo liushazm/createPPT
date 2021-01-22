@@ -7,6 +7,8 @@ public class Tag {
 
     //完整字符串，包括〖〗
     private String tagStr;
+    //是否是divider
+    private boolean isDivider;
     //标签，如BT、JZ、BG
     private String type;
     //在line中的start
@@ -28,12 +30,17 @@ public class Tag {
     }
 
     protected void init() {
+        if ("〖〗".equals(tagStr)) {
+            isDivider = true;
+            return;
+        }
+
         setCustom("=".equals(tagStr.substring(1, 2)));
 
         if (tagStr.contains("(") || tagStr.contains(")")
                 || tagStr.contains("（") || tagStr.contains("）")) {
             setSingle(false);
-            setStartTag(tagStr.contains("(") || tagStr.contains("（") );
+            setStartTag(tagStr.contains("(") || tagStr.contains("（"));
         } else {
             setSingle(true);
         }

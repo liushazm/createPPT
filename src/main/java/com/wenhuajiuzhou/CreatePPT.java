@@ -11,11 +11,11 @@ public class CreatePPT {
     }
 
     public static void generatePPTs() {
-        String fbdPath = "res/fbd/1.fbd";
-        String content = FileUtil.readFileContent(fbdPath);
+        String path = "res/fbd/1.fbd";
+        String content = FileUtil.readFileContent(path);
         //处理字符串
         content = TextHandler.deleteUselessTags(content);
-        System.out.println(content);
+//        System.out.println(content);
 
         //按每个PPT拆分字符串
         String[] pptStrArray = content.split("〖LM〗");

@@ -25,7 +25,7 @@ public class TextHandler {
         content = content.replaceAll("\uE009", "");
 
         //替换空格
-        content = content.replaceAll("〓", " ");
+        content = content.replaceAll("〓", "  ");
         //替换DW
         content = content.replaceAll("〖DW.*?〗", "\t");
         //替换换行

@@ -55,6 +55,7 @@ public class PPTUtil {
 
     //生成PPT文件
     public void generatePPT(int index, String pptStr) {
+        System.out.println(pptStr);
         //获取文件名
         String fileName = getFileName(pptStr);
 //        System.out.println(fileName);
@@ -179,6 +180,7 @@ public class PPTUtil {
                 break;
             case "C1":
                 mColor = COLOR_RED;
+                mFont = FONT_KAI_TI;
                 addTextRun(mText);
                 break;
             case "C1F":
@@ -202,10 +204,12 @@ public class PPTUtil {
 
     private void handleTagHT() {
         HT ht = new HT(mTag.getTagStr());
+        String param = ht.getParam();
+        String size = ht.getSize();
         String typeface = ht.getTypeface();
-        if (StringUtil.isEmpty(typeface)) {
+        if (StringUtil.isEmpty(param)) {
             mFont = FONT_SONG_TI;
-        } else {
+        } else if (StringUtil.isNotEmpty(typeface)) {
             switch (typeface) {
                 case "":
                     mFont = FONT_SONG_TI;
