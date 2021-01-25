@@ -31,4 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### My Rule ###
 /res/ppt/*.pptx
+/res/image

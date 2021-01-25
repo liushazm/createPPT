@@ -4,14 +4,18 @@ import com.wenhuajiuzhou.model.Page;
 import com.wenhuajiuzhou.model.Tag;
 import com.wenhuajiuzhou.tag.BT;
 import com.wenhuajiuzhou.tag.HT;
+import com.wenhuajiuzhou.tag.XC;
 import com.wenhuajiuzhou.tag.ZZ;
 import org.apache.poi.common.usermodel.fonts.FontGroup;
+import org.apache.poi.sl.usermodel.PictureData;
 import org.apache.poi.sl.usermodel.TableCell;
 import org.apache.poi.sl.usermodel.TextParagraph;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
 
@@ -175,8 +179,17 @@ public class PPTUtil {
                 case "BH":
                     handleTagBH();
                     break;
+                case "XC":
+                    handleTagXC();
+                    break;
             }
         }
+    }
+
+    private void handleTagXC() {
+        XC xc = new XC(mTag.getTagStr());
+        System.out.println("xc.getName() = " + xc.getName());
+        addPicture(xc.getName());
     }
 
     private void handleTagDivider() {
@@ -335,6 +348,26 @@ public class PPTUtil {
 
     private void addLineBreak() {
         mPrg.addLineBreak();
+    }
+
+    private void addPicture(String img) {
+        try {
+            File file = new File("res/image/" + img);
+
+            IOUtils.setByteArrayMaxOverride(Integer.MAX_VALUE);
+            BufferedImage image = ImageIO.read(file);
+            int width = image.getWidth();
+            int height = image.getHeight();
+
+            // 将图片添加到PPT中
+            XSLFPictureData pd = mPPT.addPicture(file, PictureData.PictureType.TIFF);
+            // 将图片放到指定的幻灯片中
+            XSLFPictureShape pic = mSlide.createPicture(pd);
+            // 设置图片框的放置的位置和大小
+            pic.setAnchor(new Rectangle(50, 100, width / 8, height / 8));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

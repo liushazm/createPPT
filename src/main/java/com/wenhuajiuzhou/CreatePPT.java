@@ -23,7 +23,6 @@ public class CreatePPT {
             String pptStr = pptStrArray[i];
             PPTUtil.getInstance().generatePPT(i + 1, pptStr);
             System.out.println("generatePPT : " + (i + 1));
-//            break;
         }
 
     }
