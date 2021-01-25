@@ -5,7 +5,7 @@ public class TextHandler {
     public static final String[] USELESS_TAGS = {
             "PJS", "YM", "XD", "BF", "KH",
             "ZK", "HJ", "JZ", "KG", "WB",
-            "ST", "JP", "WTXT", "WTBZ"
+            "JY", "ST", "JP", "WTXT", "WTBZ"
     };
 
     public static String deleteUselessTags(String content) {
@@ -29,8 +29,8 @@ public class TextHandler {
         //替换DW
         content = content.replaceAll("〖DW.*?〗", "\t");
         //替换换行
-        content = content.replaceAll("\uE003", "\n");
-        content = content.replaceAll("\uE004", "\n");
+        content = content.replaceAll("\uE003", "〖BR〗");
+        content = content.replaceAll("\uE004", "〖BR〗");
         return content;
     }
 

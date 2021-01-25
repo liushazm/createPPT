@@ -1,6 +1,6 @@
 package com.wenhuajiuzhou.util;
 
-import com.wenhuajiuzhou.model.Line;
+import com.wenhuajiuzhou.model.Page;
 import com.wenhuajiuzhou.model.Tag;
 import com.wenhuajiuzhou.tag.BT;
 import com.wenhuajiuzhou.tag.HT;
@@ -13,8 +13,6 @@ import org.apache.poi.xslf.usermodel.*;
 import java.awt.*;
 import java.io.*;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PPTUtil {
 
@@ -31,7 +29,7 @@ public class PPTUtil {
     private XSLFSlide mSlide;
     private XSLFTextShape mTs;
     private XSLFTextParagraph mPrg;
-    private Line mLine;
+    private Page mPage;
     private List<Tag> mTagList;
     private int mIndex;
     private Tag mTag;
@@ -55,7 +53,7 @@ public class PPTUtil {
 
     //生成PPT文件
     public void generatePPT(int index, String pptStr) {
-        System.out.println(pptStr);
+//        System.out.println(pptStr);
         //获取文件名
         String fileName = getFileName(pptStr);
 //        System.out.println(fileName);
@@ -73,7 +71,6 @@ public class PPTUtil {
             String[] pageStrArray = pptStr.split("〖PAGE〗");
             for (String pageStr : pageStrArray) {
                 generatePage(pageStr);
-//                break;
             }
 
             // 将修改后的PPT文件回写到硬盘
@@ -95,7 +92,6 @@ public class PPTUtil {
     //生成一页PPT
     private void generatePage(String pageStr) {
 //        System.out.println(pageStr);
-        pageStr = pageStr.trim();
 
         //创建一页PPT
         mSlide = mPPT.createSlide(mLayout);
@@ -103,51 +99,25 @@ public class PPTUtil {
 
         // 在幻灯片中插入一个文本框
         mTs = mSlide.createTextBox();
-        // 设置文本框的位置和文本框大小
         mTs.setAnchor(new Rectangle(10, 90, 940, 380));
+        mPrg = null;
 
-        String[] lines = pageStr.split("\n");
-        for (String line : lines) {
-            addLineText(line);
-//            System.out.println("---------------------------------");
-        }
+        addParagraph();
 
-    }
-
-    private void addLineText(String lineStr) {
-        lineStr = lineStr.trim();
-        if (lineStr.equals("")) {
+        mPage = new Page(pageStr);
+        mTagList = mPage.getTagList();
+        //无标签
+        if (mTagList == null || mTagList.size() == 0) {
+            addTextRun(pageStr);
             return;
         }
-
-        if (lineStr.startsWith("〖BT1〗")) {
-            return;
+        //起始位置不是标签
+        int start = mTagList.get(0).getStart();
+        if (start != 0) {
+            addTextRun(pageStr.substring(0 , start));
         }
-
-        mLine = new Line(lineStr);
-        mTagList = mLine.getTagList();
-        if (!mLine.isHasContent()) {
-            //没有需要显示的内容，即完全无内容或只有标签
-            if (mTagList.size() != 0) {
-                handleTags();
-            }
-        } else {
-            //有需要显示的内容
-            addParagraph();
-            mPrg.setTextAlign(TextParagraph.TextAlign.LEFT);
-            if (mTagList == null || mTagList.size() == 0) {
-                //无标签
-                addTextRun(lineStr);
-            } else {
-                //有标签
-                int start = mTagList.get(0).getStart();
-                //line开始部分不是标签
-                if (start != 0) {
-                    addTextRun(lineStr.substring(0, start));
-                }
-                handleTags();
-            }
-        }
+        //依次处理标签
+        handleTags();
     }
 
     private void handleTags() {
@@ -157,14 +127,13 @@ public class PPTUtil {
             if (mIndex != mTagList.size() - 1) {
                 int start = mTag.getEnd();
                 int end = mTagList.get(mIndex + 1).getStart();
-                mText = mLine.getLineStr().substring(start, end);
+                mText = mPage.getPageStr().substring(start, end);
             } else {
                 int start = mTag.getEnd();
-                mText = mLine.getLineStr().substring(start);
+                mText = mPage.getPageStr().substring(start);
             }
             handleTag();
         }
-
     }
 
     private void handleTag() {
@@ -188,6 +157,10 @@ public class PPTUtil {
                 mFont = FONT_SONG_TI;
                 addTextRun(mText);
                 break;
+            case "BR":
+                addParagraph();
+                addTextRun(mText);
+                break;
         }
     }
 
@@ -205,7 +178,6 @@ public class PPTUtil {
     private void handleTagHT() {
         HT ht = new HT(mTag.getTagStr());
         String param = ht.getParam();
-        String size = ht.getSize();
         String typeface = ht.getTypeface();
         if (StringUtil.isEmpty(param)) {
             mFont = FONT_SONG_TI;
@@ -259,9 +231,7 @@ public class PPTUtil {
     }
 
     private void addTextRun(String text) {
-        if (StringUtil.isEmpty(text)) {
-            return;
-        }
+        System.out.println("text = " + text);
         XSLFTextRun r = mPrg.addNewTextRun();
         r.setText(text);
         r.setFontSize(28d);
