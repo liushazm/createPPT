@@ -21,8 +21,9 @@ public class CreatePPT {
         String[] pptStrArray = content.split("〖LM〗");
         for (int i = 0; i < pptStrArray.length; i++) {
             String pptStr = pptStrArray[i];
-            PPTUtil.getInstance().generatePPT(i, pptStr);
-            break;
+            PPTUtil.getInstance().generatePPT(i + 1, pptStr);
+            System.out.println("generatePPT : " + (i + 1));
+//            break;
         }
 
     }

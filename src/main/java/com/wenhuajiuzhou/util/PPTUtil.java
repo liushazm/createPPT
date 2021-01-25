@@ -6,6 +6,7 @@ import com.wenhuajiuzhou.tag.BT;
 import com.wenhuajiuzhou.tag.HT;
 import com.wenhuajiuzhou.tag.ZZ;
 import org.apache.poi.common.usermodel.fonts.FontGroup;
+import org.apache.poi.sl.usermodel.TableCell;
 import org.apache.poi.sl.usermodel.TextParagraph;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xslf.usermodel.*;
@@ -35,6 +36,10 @@ public class PPTUtil {
     private Tag mTag;
     private String mText;
     private boolean isUnderline;
+    private XSLFTable mTable;
+    private XSLFTableRow mRow;
+    private boolean isCreatingTable;
+    private StringBuilder mCellText;
 
     private String mFont = FONT_SONG_TI;
     private Color mColor = COLOR_BLACK;
@@ -114,7 +119,7 @@ public class PPTUtil {
         //起始位置不是标签
         int start = mTagList.get(0).getStart();
         if (start != 0) {
-            addTextRun(pageStr.substring(0 , start));
+            addTextRun(pageStr.substring(0, start));
         }
         //依次处理标签
         handleTags();
@@ -137,30 +142,96 @@ public class PPTUtil {
     }
 
     private void handleTag() {
-        switch (mTag.getType()) {
-            case "BT":
-                handleTagBT();
-                break;
-            case "HT":
-                handleTagHT();
-                break;
-            case "ZZ":
-                handleTagZZ();
-                break;
-            case "C1":
-                mColor = COLOR_RED;
-                mFont = FONT_KAI_TI;
-                addTextRun(mText);
-                break;
-            case "C1F":
-                mColor = COLOR_BLACK;
-                mFont = FONT_SONG_TI;
-                addTextRun(mText);
-                break;
-            case "BR":
-                addParagraph();
-                addTextRun(mText);
-                break;
+        if (mTag.isDivider()) {
+            handleTagDivider();
+        } else {
+            switch (mTag.getType()) {
+                case "BT":
+                    handleTagBT();
+                    break;
+                case "HT":
+                    handleTagHT();
+                    break;
+                case "ZZ":
+                    handleTagZZ();
+                    break;
+                case "C1":
+                    mColor = COLOR_RED;
+                    mFont = FONT_KAI_TI;
+                    addTextRun(mText);
+                    break;
+                case "C1F":
+                    mColor = COLOR_BLACK;
+                    mFont = FONT_SONG_TI;
+                    addTextRun(mText);
+                    break;
+                case "BR":
+                    addParagraph();
+                    addTextRun(mText);
+                    break;
+                case "BG":
+                    handleTagBG();
+                    break;
+                case "BH":
+                    handleTagBH();
+                    break;
+            }
+        }
+    }
+
+    private void handleTagDivider() {
+        addTableCell();
+        initCellText();
+    }
+
+    private void initCellText() {
+        mCellText = new StringBuilder();
+        addTextRun(mText);
+    }
+
+    private void addTableCell() {
+        XSLFTableCell cell = mRow.addCell();
+        String text = mCellText.toString();
+        XSLFTextParagraph p = cell.addNewTextParagraph();
+        p.setTextAlign(TextParagraph.TextAlign.CENTER);
+        XSLFTextRun r = p.addNewTextRun();
+        r.setText(text);
+        r.setFontSize(28d);
+        r.setFontFamily(mFont, FontGroup.EAST_ASIAN);
+        r.setFontFamily(FONT_TIMES, FontGroup.LATIN);
+        r.setFontColor(mColor);
+        r.setUnderlined(isUnderline);
+
+        // 设置单元格边框的粗细
+        cell.setBorderWidth(TableCell.BorderEdge.bottom, 1);
+        cell.setBorderWidth(TableCell.BorderEdge.left, 1);
+        cell.setBorderWidth(TableCell.BorderEdge.right, 1);
+        cell.setBorderWidth(TableCell.BorderEdge.top, 1);
+        // 设置单元格边框的颜色
+        cell.setBorderColor(TableCell.BorderEdge.bottom, Color.BLACK);
+        cell.setBorderColor(TableCell.BorderEdge.left, Color.BLACK);
+        cell.setBorderColor(TableCell.BorderEdge.right, Color.BLACK);
+        cell.setBorderColor(TableCell.BorderEdge.top, Color.BLACK);
+    }
+
+    private void handleTagBH() {
+        if (mCellText != null) {
+            addTableCell();
+        }
+        mRow = mTable.addRow();
+        initCellText();
+        addLineBreak();
+    }
+
+    private void handleTagBG() {
+        if (mTag.isStartTag()) {
+            isCreatingTable = true;
+            mCellText = null;
+            mTable = mSlide.createTable();
+            mTable.setAnchor(new Rectangle(10, 130, 500, 200));
+        } else {
+            addTableCell();
+            isCreatingTable = false;
         }
     }
 
@@ -183,9 +254,6 @@ public class PPTUtil {
             mFont = FONT_SONG_TI;
         } else if (StringUtil.isNotEmpty(typeface)) {
             switch (typeface) {
-                case "":
-                    mFont = FONT_SONG_TI;
-                    break;
                 case "H":
                     mFont = FONT_HEI_TI;
                     break;
@@ -194,6 +262,9 @@ public class PPTUtil {
                     break;
                 case "F":
                     mFont = FONT_FANG_SONG;
+                    break;
+                default:
+                    mFont = FONT_SONG_TI;
                     break;
             }
         }
@@ -231,7 +302,15 @@ public class PPTUtil {
     }
 
     private void addTextRun(String text) {
-        System.out.println("text = " + text);
+//        System.out.println("text = " + text);
+
+        if (isCreatingTable) {
+            if (!StringUtil.isEmpty(text)) {
+                mCellText.append(text.trim());
+            }
+            return;
+        }
+
         XSLFTextRun r = mPrg.addNewTextRun();
         r.setText(text);
         r.setFontSize(28d);
