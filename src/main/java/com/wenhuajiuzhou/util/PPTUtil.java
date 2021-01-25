@@ -2,10 +2,7 @@ package com.wenhuajiuzhou.util;
 
 import com.wenhuajiuzhou.model.Page;
 import com.wenhuajiuzhou.model.Tag;
-import com.wenhuajiuzhou.tag.BT;
-import com.wenhuajiuzhou.tag.HT;
-import com.wenhuajiuzhou.tag.XC;
-import com.wenhuajiuzhou.tag.ZZ;
+import com.wenhuajiuzhou.tag.*;
 import org.apache.poi.common.usermodel.fonts.FontGroup;
 import org.apache.poi.sl.usermodel.PictureData;
 import org.apache.poi.sl.usermodel.TableCell;
@@ -182,13 +179,28 @@ public class PPTUtil {
                 case "XC":
                     handleTagXC();
                     break;
+                case "CD":
+                    handleTagCD();
+                    break;
             }
         }
     }
 
+    private void handleTagCD() {
+        CD cd = new CD(mTag.getTagStr());
+        int length = cd.getLength();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            builder.append("  ");
+        }
+        isUnderline = true;
+        addTextRun(builder.toString());
+        isUnderline = false;
+        addTextRun(mText);
+    }
+
     private void handleTagXC() {
         XC xc = new XC(mTag.getTagStr());
-        System.out.println("xc.getName() = " + xc.getName());
         addPicture(xc.getName());
     }
 
