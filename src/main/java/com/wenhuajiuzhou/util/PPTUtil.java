@@ -43,6 +43,7 @@ public class PPTUtil {
     private boolean isCreatingTable;
     private StringBuilder mCellText;
     private boolean isStartHL;
+    private int mXCStartX;
 
     private String mFont = FONT_SONG_TI;
     private Color mColor = COLOR_BLACK;
@@ -107,6 +108,8 @@ public class PPTUtil {
         //创建一页PPT
         mSlide = mPPT.createSlide(mLayout);
         mPPT.setSlideOrder(mSlide, mPPT.getSlides().size() - 2);
+
+        mXCStartX = 50;
 
         // 在幻灯片中插入一个文本框
         mTs = mSlide.createTextBox();
@@ -205,6 +208,9 @@ public class PPTUtil {
                 case "HL":
                     handleTagHL();
                     break;
+                case "TS":
+                    handleTagTS();
+                    break;
                 default:
                     System.out.println(mTag.getType() + " tag 没有处理。");
                     break;
@@ -212,9 +218,19 @@ public class PPTUtil {
         }
     }
 
+    private void handleTagTS() {
+        TS ts = new TS(mTag.getTagStr());
+        if (ts.isStartTag()) {
+            addTextRun("\n");
+            addTextRun(mText);
+        } else {
+            addTextRun(mText);
+            addTextRun("\n");
+        }
+    }
+
     private void handleTagHL() {
         HL hl = new HL(mTag.getTagStr());
-        //TODO
         isStartHL = hl.isStartTag();
         addTextRun(mText);
     }
@@ -272,7 +288,7 @@ public class PPTUtil {
         if (isCreatingTable) {
             addTableCell();
             initCellText();
-        } else  if (isStartHL) {
+        } else if (isStartHL) {
             addTextRun("\t");
             addTextRun(mText);
         }
@@ -445,8 +461,11 @@ public class PPTUtil {
                 BufferedImage image = ImageIO.read(file);
                 int width = image.getWidth() / 8;
                 int height = image.getHeight() / 8;
-                int x = isXC ? 50 : (int) (mPageSize.getWidth() - width - 100);
+                int x = isXC ? mXCStartX : (int) (mPageSize.getWidth() - width - 100);
                 int y = (int) mTs.getTextHeight() + 90;
+                if (isXC) {
+                    mXCStartX += width;
+                }
 
                 // 将图片添加到PPT中
                 XSLFPictureData pd = mPPT.addPicture(file, PictureData.PictureType.TIFF);
