@@ -17,13 +17,13 @@ public class BT extends Tag {
     public BT(String tagStr) {
         setTagStr(tagStr);
 
-        if (StringUtil.isNotEmpty(param)) {
+        if (StringUtil.isTrimNotEmpty(param)) {
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(param);
             boolean matches = m.matches();
             if (matches) {
                 String levelStr = m.group(1);
-                if (StringUtil.isNotEmpty(levelStr)) {
+                if (StringUtil.isTrimNotEmpty(levelStr)) {
                     level = Integer.parseInt(levelStr);
                 }
             }

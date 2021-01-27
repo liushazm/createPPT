@@ -18,7 +18,7 @@ public class CD extends Tag {
     public CD(String tagStr) {
         setTagStr(tagStr);
 
-        if (StringUtil.isNotEmpty(param)) {
+        if (StringUtil.isTrimNotEmpty(param)) {
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(param);
             boolean matches = m.matches();

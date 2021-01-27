@@ -30,6 +30,7 @@ public class Tag {
     }
 
     protected void init() {
+//        System.out.println("init tagStr = " + tagStr);
         if ("〖〗".equals(tagStr)) {
             isDivider = true;
             return;

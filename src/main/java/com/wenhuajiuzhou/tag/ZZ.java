@@ -18,13 +18,13 @@ public class ZZ extends Tag {
     public ZZ(String tagStr) {
         setTagStr(tagStr);
 
-        if (StringUtil.isNotEmpty(param)) {
+        if (StringUtil.isTrimNotEmpty(param)) {
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(param);
             boolean matches = m.matches();
             if (matches) {
                 String nStr = m.group(1);
-                if (StringUtil.isNotEmpty(nStr)) {
+                if (StringUtil.isTrimNotEmpty(nStr)) {
                     number = Integer.parseInt(nStr);
                 }
                 symbol = m.group(2);

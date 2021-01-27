@@ -42,6 +42,7 @@ public class PPTUtil {
     private XSLFTableRow mRow;
     private boolean isCreatingTable;
     private StringBuilder mCellText;
+    private boolean isStartHL;
 
     private String mFont = FONT_SONG_TI;
     private Color mColor = COLOR_BLACK;
@@ -201,11 +202,21 @@ public class PPTUtil {
                 case "FK":
                     handleTagFK();
                     break;
+                case "HL":
+                    handleTagHL();
+                    break;
                 default:
                     System.out.println(mTag.getType() + " tag 没有处理。");
                     break;
             }
         }
+    }
+
+    private void handleTagHL() {
+        HL hl = new HL(mTag.getTagStr());
+        //TODO
+        isStartHL = hl.isStartTag();
+        addTextRun(mText);
     }
 
     private void handleTagKG() {
@@ -226,7 +237,7 @@ public class PPTUtil {
 
     private void handleTagCS() {
         CS cs = new CS(mTag.getTagStr());
-        if (StringUtil.isNotEmpty(cs.getParam())) {
+        if (StringUtil.isTrimNotEmpty(cs.getParam())) {
             mColor = COLOR_RED;
         } else {
             mColor = COLOR_BLACK;
@@ -258,8 +269,13 @@ public class PPTUtil {
     }
 
     private void handleTagDivider() {
-        addTableCell();
-        initCellText();
+        if (isCreatingTable) {
+            addTableCell();
+            initCellText();
+        } else  if (isStartHL) {
+            addTextRun("\t");
+            addTextRun(mText);
+        }
     }
 
     private void initCellText() {
@@ -328,9 +344,9 @@ public class PPTUtil {
         HT ht = new HT(mTag.getTagStr());
         String param = ht.getParam();
         String typeface = ht.getTypeface();
-        if (StringUtil.isEmpty(param)) {
+        if (StringUtil.isTrimEmpty(param)) {
             mFont = FONT_SONG_TI;
-        } else if (StringUtil.isNotEmpty(typeface)) {
+        } else if (StringUtil.isTrimNotEmpty(typeface)) {
             switch (typeface) {
                 case "H":
                     mFont = FONT_HEI_TI;
@@ -380,8 +396,12 @@ public class PPTUtil {
 
     private void addTextRun(String text) {
 //        System.out.println("text = " + text);
+        if (StringUtil.isEmpty(text)) {
+            return;
+        }
+
         if (isCreatingTable) {
-            if (!StringUtil.isEmpty(text)) {
+            if (!StringUtil.isTrimEmpty(text)) {
                 mCellText.append(text.trim());
             }
             return;

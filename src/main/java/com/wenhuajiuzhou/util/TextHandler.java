@@ -24,6 +24,10 @@ public class TextHandler {
         content = content.replaceAll("\uE008", "");
         content = content.replaceAll("\uE009", "");
 
+        //列竖式不支持，替换成红色文字
+        content = content.replaceAll("〖FK[\\(（]W〗[\\s\\S]*?〖\\d〗[\\s\\S]*?〖FK[\\)）]〗",
+                "〖CS%65,0,0,0〗列竖式不支持，请手动替换〖CS〗");
+
         //替换空格
         content = content.replaceAll("〓", "  ");
         //替换DW
