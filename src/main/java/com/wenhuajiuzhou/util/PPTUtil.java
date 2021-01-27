@@ -28,6 +28,7 @@ public class PPTUtil {
 
     private XSLFSlideLayout mLayout;
     private XMLSlideShow mPPT = null;
+    private Dimension mPageSize;
     private XSLFSlide mSlide;
     private XSLFTextShape mTs;
     private XSLFTextParagraph mPrg;
@@ -62,14 +63,16 @@ public class PPTUtil {
 //        System.out.println(pptStr);
         //获取文件名
         String fileName = getFileName(pptStr);
-//        System.out.println(fileName);
+        System.out.println("fileName = " + fileName);
 
-        File fileTemp = new File("res/ppt/template.pptx");
+        File fileTemp = new File("res/ppt/template_yuwen.pptx");
         File fileDest = new File("res/ppt/" + index + "." + fileName + ".pptx");
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(fileTemp);
             mPPT = new XMLSlideShow(fis);
+            mPageSize = mPPT.getPageSize();
+
 
             //获取幻灯片模板
             mLayout = mPPT.getSlideMasters().get(0).getLayout("content");
@@ -90,9 +93,10 @@ public class PPTUtil {
     }
 
     private String getFileName(String pptStr) {
-        int start = pptStr.indexOf("〖BT1〗");
-        int end = pptStr.indexOf("〖HT〗", start);
-        return pptStr.substring(start + 5, end);
+        String titleTag = "〖BT1#〗";
+        int start = pptStr.indexOf(titleTag);
+        int end = pptStr.indexOf("〖BR〗", start);
+        return pptStr.substring(start + titleTag.length(), end);
     }
 
     //生成一页PPT
@@ -147,15 +151,6 @@ public class PPTUtil {
             handleTagDivider();
         } else {
             switch (mTag.getType()) {
-                case "BT":
-                    handleTagBT();
-                    break;
-                case "HT":
-                    handleTagHT();
-                    break;
-                case "ZZ":
-                    handleTagZZ();
-                    break;
                 case "C1":
                     mColor = COLOR_RED;
                     mFont = FONT_KAI_TI;
@@ -165,6 +160,18 @@ public class PPTUtil {
                     mColor = COLOR_BLACK;
                     mFont = FONT_SONG_TI;
                     addTextRun(mText);
+                    break;
+                case "KG":
+                    handleTagKG();
+                    break;
+                case "BT":
+                    handleTagBT();
+                    break;
+                case "HT":
+                    handleTagHT();
+                    break;
+                case "ZZ":
+                    handleTagZZ();
                     break;
                 case "BR":
                     addParagraph();
@@ -179,11 +186,52 @@ public class PPTUtil {
                 case "XC":
                     handleTagXC();
                     break;
+                case "TP":
+                    handleTagTP();
+                    break;
                 case "CD":
                     handleTagCD();
                     break;
+                case "CS":
+                    handleTagCS();
+                    break;
+                case "CX":
+                    handleTagCX();
+                    break;
+                case "FK":
+                    handleTagFK();
+                    break;
+                default:
+                    System.out.println(mTag.getType() + " tag 没有处理。");
+                    break;
             }
         }
+    }
+
+    private void handleTagKG() {
+        KG kg = new KG(mTag.getTagStr());
+        addTextRun("  ");
+        addTextRun(mText);
+    }
+
+    private void handleTagFK() {
+        FK fk = new FK(mTag.getTagStr());
+        isUnderline = fk.isStartTag();
+        addTextRun(mText);
+    }
+
+    private void handleTagCX() {
+        addTextRun(mText);
+    }
+
+    private void handleTagCS() {
+        CS cs = new CS(mTag.getTagStr());
+        if (StringUtil.isNotEmpty(cs.getParam())) {
+            mColor = COLOR_RED;
+        } else {
+            mColor = COLOR_BLACK;
+        }
+        addTextRun(mText);
     }
 
     private void handleTagCD() {
@@ -197,6 +245,11 @@ public class PPTUtil {
         addTextRun(builder.toString());
         isUnderline = false;
         addTextRun(mText);
+    }
+
+    private void handleTagTP() {
+        TP tp = new TP(mTag.getTagStr());
+        addPicture(tp.getName(), false);
     }
 
     private void handleTagXC() {
@@ -317,7 +370,6 @@ public class PPTUtil {
         mFont = FONT_SONG_TI;
     }
 
-
     private void addParagraph() {
         if (mPrg == null) {
             mPrg = mTs.getTextParagraphs().get(0);
@@ -328,7 +380,6 @@ public class PPTUtil {
 
     private void addTextRun(String text) {
 //        System.out.println("text = " + text);
-
         if (isCreatingTable) {
             if (!StringUtil.isEmpty(text)) {
                 mCellText.append(text.trim());
@@ -363,22 +414,31 @@ public class PPTUtil {
     }
 
     private void addPicture(String img) {
-        try {
-            File file = new File("res/image/" + img);
+        addPicture(img, true);
+    }
 
-            IOUtils.setByteArrayMaxOverride(Integer.MAX_VALUE);
-            BufferedImage image = ImageIO.read(file);
-            int width = image.getWidth();
-            int height = image.getHeight();
+    private void addPicture(String img, boolean isXC) {
+        File file = new File("res/image/" + img);
+        if (file.exists()) {
+            try {
+                IOUtils.setByteArrayMaxOverride(Integer.MAX_VALUE);
+                BufferedImage image = ImageIO.read(file);
+                int width = image.getWidth() / 8;
+                int height = image.getHeight() / 8;
+                int x = isXC ? 50 : (int) (mPageSize.getWidth() - width - 100);
+                int y = (int) mTs.getTextHeight() + 90;
 
-            // 将图片添加到PPT中
-            XSLFPictureData pd = mPPT.addPicture(file, PictureData.PictureType.TIFF);
-            // 将图片放到指定的幻灯片中
-            XSLFPictureShape pic = mSlide.createPicture(pd);
-            // 设置图片框的放置的位置和大小
-            pic.setAnchor(new Rectangle(50, 100, width / 8, height / 8));
-        } catch (IOException e) {
-            e.printStackTrace();
+                // 将图片添加到PPT中
+                XSLFPictureData pd = mPPT.addPicture(file, PictureData.PictureType.TIFF);
+                // 将图片放到指定的幻灯片中
+                XSLFPictureShape pic = mSlide.createPicture(pd);
+                // 设置图片框的放置的位置和大小
+                pic.setAnchor(new Rectangle(x, y, width, height));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("image file : " + img + " 不存在。");
         }
     }
 

@@ -11,7 +11,7 @@ public class CreatePPT {
     }
 
     public static void generatePPTs() {
-        String path = "res/fbd/1.fbd";
+        String path = "res/fbd/shuxue.fbd";
         String content = FileUtil.readFileContent(path);
         //处理字符串
         content = TextHandler.deleteUselessTags(content);
@@ -22,7 +22,8 @@ public class CreatePPT {
         for (int i = 0; i < pptStrArray.length; i++) {
             String pptStr = pptStrArray[i];
             PPTUtil.getInstance().generatePPT(i + 1, pptStr);
-            System.out.println("generatePPT : " + (i + 1));
+            System.out.println("--------------------------------------generatePPT : " + (i + 1));
+//            break;
         }
 
     }

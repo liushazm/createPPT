@@ -4,8 +4,8 @@ public class TextHandler {
 
     public static final String[] USELESS_TAGS = {
             "PJS", "YM", "XD", "BF", "KH",
-            "ZK", "HJ", "JZ", "KG", "WB",
-            "JY", "ST", "JP", "WTXT", "WTBZ"
+            "ZK", "HJ", "JZ", "WB", "JY",
+            "ST", "JP", "WTXT", "WTBZ"
     };
 
     public static String deleteUselessTags(String content) {
@@ -16,10 +16,10 @@ public class TextHandler {
         }
 
         //删除自定义标签
-        content = content.replaceAll("〖ZD.*?\\(〗[\\s\\S]*?〖ZD\\)〗", "");
+        content = content.replaceAll("〖ZD.*?[\\(（]〗[\\s\\S]*?〖ZD[\\)）]〗", "");
         //删除边排
-        content = content.replaceAll("〖BP\\(〗[\\s\\S]*?〖BP\\)〗", "");
-        content = content.replaceAll("〖BW\\(.*?〗[\\s\\S]*?〖BW\\)〗", "");
+        content = content.replaceAll("〖BP[\\(（]〗[\\s\\S]*?〖BP[\\)）]〗", "");
+        content = content.replaceAll("〖BW[\\(（].*?〗[\\s\\S]*?〖BW[\\)）]〗", "");
         //删除盒组括弧
         content = content.replaceAll("\uE008", "");
         content = content.replaceAll("\uE009", "");

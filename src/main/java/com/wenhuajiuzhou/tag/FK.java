@@ -8,22 +8,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Data
-public class XC extends Tag {
+public class FK extends Tag {
 
-    private static final String pattern = "([^;；]+?)([;；][SXZY]\\d+)*?([;；]%\\d{1,3}%\\d{1,3})?([,，][SQXQJZ]{2})?";
+    private static final String pattern = "([FSDWKQ=CWXH]{1,2})?";
 
-    private String name;
+    private String borderType;
 
-    public XC(String tagStr) {
+    public FK(String tagStr) {
         setTagStr(tagStr);
 
-        System.out.println("XC param = " + param);
         if (StringUtil.isNotEmpty(param)) {
             Pattern p = Pattern.compile(pattern);
             Matcher m = p.matcher(param);
             boolean matches = m.matches();
             if (matches) {
-                name = m.group(1);
+                borderType = m.group(1);
             }
         }
     }
